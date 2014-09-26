@@ -19,10 +19,11 @@ typedef struct
 
 void const_ball(float x,float y,float a,float b,ball *e);
 
-int i,j,cursor_pos_x=0,cursor_pos_y=0;
+int i,j,window_width=500,window_height=500;
 int ball_no=4;
 float speed=0.02;
-ball enemy[4];
+ball enemy[4], player;
+float cursor_pos_x=0,cursor_pos_y=0;
 
 
 //float x1=-1.0,x2=2.0,y11=0.0,y2=-2.0;
@@ -68,18 +69,26 @@ if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
 
 void mouse_co_ordinates(int x,int y)
 {
-    //printf("x: %d  y: %d\n",x,y);
+  printf("%d %d\n",x,y);/*
 
+    if(x > 0 && x <  window_width)
+    {
+        printf("%d %f\n",x,y);
+        cursor_pos_x = x/window_width;
+        cursor_pos_y = y/window_height;
+    }*/
 }
 
 void drawBall(ball *obj)
 {
+    //printf("Drawing ball\n");
 
     glColor3f(1.0,0.0,0.0);
 
     glPushMatrix();
-
+    //printf("pos_x: %f  pos_y: %f\n",obj->pos_x,obj->pos_y);
     glTranslatef(obj->pos_x,obj->pos_y,-5.0);
+    //printf("pos_x: %f  pos_y: %f\n",obj->pos_x,obj->pos_y);
     //glTranslatef(x1,y11,-5.0);
     glutSolidSphere(0.2,20,20);
 
@@ -133,31 +142,38 @@ void update()
 {
 
     if(flag)
+    {
+        for(i=0;i<ball_no;i++)
         {
-            for(i=0;i<ball_no;i++)
-            {
                 // Detect Ball - Wall collision
-                ball_wall_coll(&enemy[i]);
+            ball_wall_coll(&enemy[i]);
 
                 // Detect Ball - Ball collision
-                for(j=i+1;j<ball_no;j++)
-                {
-                    if(i == 3)
-                        break;
+            for(j=i+1;j<ball_no;j++)
+            {
+                if(i == 3)
+                break;
 
-                    ball_ball_coll(&enemy[i],&enemy[j]);
-                }
-
-                enemy[i].pos_x += enemy[i].vel_x;
-                enemy[i].pos_y += enemy[i].vel_y;
+                ball_ball_coll(&enemy[i],&enemy[j]);
             }
 
+            enemy[i].pos_x += enemy[i].vel_x;
+            enemy[i].pos_y += enemy[i].vel_y;
         }
-        else
-        {
-            //printf("stoped\n");
 
-        }
+    }
+
+    float temp_x = (cursor_pos_x - player.pos_x);
+    float temp_y = (cursor_pos_y - player.pos_y);
+    player.vel_x = temp_x/ sqrt((temp_x * temp_x) + (temp_y * temp_y));
+    player.vel_y = temp_y/ sqrt((temp_x * temp_x) + (temp_y * temp_y));
+
+    player.pos_x += player.vel_x;
+    player.pos_y += player.vel_y;
+    printf("%f %f\n",player.pos_x,player.pos_y);
+    flag=0;
+
+
 }
 void display()
 {
@@ -167,17 +183,29 @@ void display()
 
     glLoadIdentity();
 
+
     //glShadeModel(GL_SMOOTH);
     //drawBall1();
 
     //drawBall2();
+    if(flag)
+     update();
+
+    // Draw Enemies
+    /*
     for(i=0;i<ball_no;i++)
     {
         //printf("%d\n",i);
          drawBall(&enemy[i]);
     }
+    */
 
-    update();
+    // Draw player
+    drawBall(&player);
+
+
+
+
 
     glutSwapBuffers();
 }
@@ -189,7 +217,7 @@ int main(int argc,char **argv)
 
     glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB|GLUT_DEPTH);
 
-    glutInitWindowSize(500,500);
+    glutInitWindowSize(window_width,window_height);
 
     glutCreateWindow("Collision Window");
 
@@ -198,10 +226,16 @@ int main(int argc,char **argv)
     glutDisplayFunc(display);
 
     //Init
+    // instantiate Enemies
+    /*
     const_ball(1.0,1.0,-.857,-0.514,&enemy[0]);
     const_ball(-1.5,0.2,0.514,-0.857,&enemy[1]);
     const_ball(0.6,-1.0,-0.919,0.394,&enemy[2]);
     const_ball(-0.4,-1.4,0.965,0.263,&enemy[3]);
+
+    */
+    // Instantiate player
+    const_ball(0,0,0,0,&player);
 
 
 
