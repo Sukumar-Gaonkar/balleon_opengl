@@ -70,22 +70,13 @@ if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
 
 void mouse_co_ordinates(int x,int y)
 {
-    //char c = x;
-    //printf("before %d %d %c\n",x,y,c);
+        cursor_pos_x = (float)x/window_width * 0.4 - 0.2;
+        cursor_pos_y = (float)y/window_height * 0.4 - 0.2;
 
+        player.vel_x = cursor_pos_x - player.pos_x;
+        player.vel_y = cursor_pos_y - player.pos_y;
 
-    //if(isdigit(c))
-        //printf("after %d %d\n",x,y);
-
-
-    if(x > 0 && x <  window_width)
-    {
-        //printf("%d %d\n",x,y);
-        cursor_pos_x = (float)x/window_width * 0.4;
-        cursor_pos_y = (float)y/window_height * 0.4;
-
-        printf("%f %f %f %f\n",cursor_pos_x,cursor_pos_y,player.pos_x,player.pos_y);
-    }
+        printf("cursor %f %f\n",cursor_pos_x,cursor_pos_y);
 }
 
 void drawBall(ball *obj)
@@ -177,15 +168,15 @@ void update()
     float temp_xy = sqrt((temp_x * temp_x) + (temp_y * temp_y));
     if(temp_xy != 0)
     {
-        player.vel_x = temp_x/ temp_xy);
-        player.vel_y = temp_y/ temp_xy);
+        player.vel_x = temp_x/ temp_xy;
+        player.vel_y = temp_y/ temp_xy;
     }
 //printf("done calculating vel  %f %f\n",player.vel_x,player.vel_y);
  //printf("before updating %f %f %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
     player.pos_x += player.vel_x;
     player.pos_y += player.vel_y;
- //   printf("updating %f %f\n",player.pos_x,player.pos_y);
-    flag=0;
+    //printf("updating %f %f\n",player.pos_x,player.pos_y);
+    //flag=0;
 
 
 }
