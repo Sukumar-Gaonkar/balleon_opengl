@@ -16,13 +16,14 @@ typedef struct
     float pos_y;
     float vel_x;
     float vel_y;
+
 } ball;
 
 void const_ball(float x,float y,float a,float b,ball *e);
 
 int i,j,window_width=500,window_height=500;
 int ball_no=4;
-float speed=0.02;
+float speed=0.02,player_speed=0.05;
 ball enemy[4], player;
 float cursor_pos_x=0,cursor_pos_y=0;
 
@@ -70,13 +71,21 @@ if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
 
 void mouse_co_ordinates(int x,int y)
 {
-        cursor_pos_x = (float)x/window_width * 0.4 - 0.2;
-        cursor_pos_y = (float)y/window_height * 0.4 - 0.2;
+        cursor_pos_x = ((float)x/window_width - 0.5 ) * 4;
+        cursor_pos_y = ((float)y/window_height - 0.5 ) * -4;
 
-        player.vel_x = cursor_pos_x - player.pos_x;
-        player.vel_y = cursor_pos_y - player.pos_y;
+//      player.pos_x = 2;
+//      player.pos_y = 2;
 
-        printf("cursor %f %f\n",cursor_pos_x,cursor_pos_y);
+
+//        player.vel_x = (cursor_pos_x - player.pos_x) * player_speed;
+//        player.vel_y = (cursor_pos_y - player.pos_y) * player_speed;
+printf("diff: %f  vel: %f\n",(cursor_pos_x - player.pos_x),player.vel_x);
+//
+//        player.vel_x = cursor_pos_x - player.pos_x;
+//        player.vel_y = cursor_pos_y - player.pos_y;
+//
+        printf("player pos: %f %f  vel : %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
 }
 
 void drawBall(ball *obj)
@@ -166,16 +175,18 @@ void update()
     float temp_x = (cursor_pos_x - player.pos_x);
     float temp_y = (cursor_pos_y - player.pos_y);
     float temp_xy = sqrt((temp_x * temp_x) + (temp_y * temp_y));
+    printf("temp: %f %f %f\n",temp_x,temp_y,temp_xy);
     if(temp_xy != 0)
     {
-        player.vel_x = temp_x/ temp_xy;
-        player.vel_y = temp_y/ temp_xy;
+        player.vel_x = temp_x / temp_xy * player_speed;
+        player.vel_y = temp_y / temp_xy * player_speed;
+        //flag=0;
     }
 //printf("done calculating vel  %f %f\n",player.vel_x,player.vel_y);
  //printf("before updating %f %f %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
     player.pos_x += player.vel_x;
     player.pos_y += player.vel_y;
-    //printf("updating %f %f\n",player.pos_x,player.pos_y);
+    //printf("updating player pos: %f %f vel: %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
     //flag=0;
 
 
@@ -241,14 +252,14 @@ int main(int argc,char **argv)
     */
     // Instantiate player
     const_ball(0,0,0,0,&player);
-printf("Creating object %f %f\n",player.vel_x,player.vel_y);
+//printf("Creating object %f %f\n",player.vel_x,player.vel_y);
 
 
     glutIdleFunc(display);
 
     glutReshapeFunc(reshape);
 
-    glutMouseFunc(mouse_click);
+    //glutMouseFunc(mouse_click);
     glutPassiveMotionFunc(mouse_co_ordinates);
 
     glutSpecialFunc(keyPressed);
