@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <ctype.h>
 #include <math.h>
 #include <windows.h>
 #ifdef __APPLE__
@@ -69,14 +70,22 @@ if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
 
 void mouse_co_ordinates(int x,int y)
 {
-  printf("%d %d\n",x,y);/*
+    //char c = x;
+    //printf("before %d %d %c\n",x,y,c);
+
+
+    //if(isdigit(c))
+        //printf("after %d %d\n",x,y);
+
 
     if(x > 0 && x <  window_width)
     {
-        printf("%d %f\n",x,y);
-        cursor_pos_x = x/window_width;
-        cursor_pos_y = y/window_height;
-    }*/
+        //printf("%d %d\n",x,y);
+        cursor_pos_x = (float)x/window_width * 0.4;
+        cursor_pos_y = (float)y/window_height * 0.4;
+
+        printf("%f %f %f %f\n",cursor_pos_x,cursor_pos_y,player.pos_x,player.pos_y);
+    }
 }
 
 void drawBall(ball *obj)
@@ -165,12 +174,17 @@ void update()
 
     float temp_x = (cursor_pos_x - player.pos_x);
     float temp_y = (cursor_pos_y - player.pos_y);
-    player.vel_x = temp_x/ sqrt((temp_x * temp_x) + (temp_y * temp_y));
-    player.vel_y = temp_y/ sqrt((temp_x * temp_x) + (temp_y * temp_y));
-
+    float temp_xy = sqrt((temp_x * temp_x) + (temp_y * temp_y));
+    if(temp_xy != 0)
+    {
+        player.vel_x = temp_x/ temp_xy);
+        player.vel_y = temp_y/ temp_xy);
+    }
+//printf("done calculating vel  %f %f\n",player.vel_x,player.vel_y);
+ //printf("before updating %f %f %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
     player.pos_x += player.vel_x;
     player.pos_y += player.vel_y;
-    printf("%f %f\n",player.pos_x,player.pos_y);
+ //   printf("updating %f %f\n",player.pos_x,player.pos_y);
     flag=0;
 
 
@@ -236,7 +250,7 @@ int main(int argc,char **argv)
     */
     // Instantiate player
     const_ball(0,0,0,0,&player);
-
+printf("Creating object %f %f\n",player.vel_x,player.vel_y);
 
 
     glutIdleFunc(display);
