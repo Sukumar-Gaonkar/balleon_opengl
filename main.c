@@ -12,6 +12,8 @@
 
 typedef struct
 {
+
+}
     float pos_x;
     float pos_y;
     float vel_x;
