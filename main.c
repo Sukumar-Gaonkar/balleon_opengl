@@ -12,8 +12,6 @@
 
 typedef struct
 {
-
-}
     float pos_x;
     float pos_y;
     float vel_x;
@@ -32,7 +30,7 @@ float cursor_pos_x=0,cursor_pos_y=0;
 
 //float x1=-1.0,x2=2.0,y11=0.0,y2=-2.0;
 //float x1_i=0.015,x2_i=-0.015,x1_j=0.000,x2_j=0.015;
-static int flag=0;
+static int flag=1;
 
 void const_ball(float x,float y,float a,float b,ball *obj)
 {
