@@ -2,6 +2,10 @@
 #include <ctype.h>
 #include <math.h>
 #include <windows.h>
+//#include <GL/glui.h>
+/*
+#include <GL/gl.h>
+
 #ifdef __APPLE__
 #include<GLUT/glut.h>
 #include<openGL/openGL.h>
@@ -9,7 +13,8 @@
 #else
 #include<GL/glut.h>
 #endif
-
+*/
+#include<GL/freeglut.h>
 typedef struct
 {
     float pos_x;
@@ -21,7 +26,7 @@ typedef struct
 
 void const_ball(float x,float y,float a,float b,ball *e);
 
-int i,j,window_width=500,window_height=500,player_life = 3;
+int i,j,window_width=500,window_height=500,player_life = 10;
 int ball_no=4;
 float enemy_speed=0.07,player_speed=0.05;
 ball enemy[4], player;
@@ -30,7 +35,20 @@ float cursor_pos_x=0,cursor_pos_y=0;
 
 //float x1=-1.0,x2=2.0,y11=0.0,y2=-2.0;
 //float x1_i=0.015,x2_i=-0.015,x1_j=0.000,x2_j=0.015;
-static int flag=1;
+static int game_start = 0;
+
+void init(void)
+{
+    glClearColor( 1, 1, 1, 1);
+    glClearDepth( 1.0 );
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_LIGHTING);
+    glShadeModel(GL_SMOOTH);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+    glEnable(GL_LIGHT0);
+}
+
 
 void const_ball(float x,float y,float a,float b,ball *obj)
 {
@@ -68,7 +86,7 @@ void mouse_click(int button, int state, int x, int y) {
     if(state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
     {
          printf("Left click\n");
-         flag = 1;
+         game_start = 1;
     }
 }
 
@@ -88,14 +106,17 @@ void mouse_co_ordinates(int x,int y)
 //        player.vel_x = cursor_pos_x - player.pos_x;
 //        player.vel_y = cursor_pos_y - player.pos_y;
 //
-        printf("player pos: %f %f  vel : %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
+        //printf("player pos: %f %f  vel : %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
 }
 
-void drawBall(ball *obj)
+void drawBall(ball *obj,int color)
 {
     //printf("Drawing ball\n");
 
-    glColor3f(1.0,0.0,0.0);
+    if(color == 1)
+        glColor3f(1.0,0.0,0.0);
+    else
+        glColor3f(0.0,0.0,1.0);
 
     glPushMatrix();
     //printf("pos_x: %f  pos_y: %f\n",obj->pos_x,obj->pos_y);
@@ -109,13 +130,15 @@ void drawBall(ball *obj)
 }
 
 void enemy_player_coll(ball *enemy)
-{/*
+{
     float val = sqrt((player.pos_x - enemy->pos_x)*(player.pos_x - enemy->pos_x) + (player.pos_y - enemy->pos_y)*(player.pos_y - enemy->pos_y));
     if(val < 0.4)
     {
         player_life--;
-        if(player_life == 0);
-            //flag = 0;
+        printf("Life: %d\n",player_life);
+         if(player_life == 0)
+            game_start = 0;
+
         float temp = player.vel_x;
         player.vel_x = enemy->vel_x;
         enemy->vel_x = temp;
@@ -124,8 +147,13 @@ void enemy_player_coll(ball *enemy)
         player.vel_y = enemy->vel_y;
         enemy->vel_y = temp;
 
+        enemy->pos_x += enemy->vel_x *4;
+        enemy->pos_y += enemy->vel_y *4;
+//        player.pos_x += player.vel_x;
+//        player.pos_y += player.vel_y;
+
+
     }
-    */
 }
 
 
@@ -153,7 +181,7 @@ void ball_ball_coll(ball *obj1,ball *obj2)
         obj2->pos_y += obj2->vel_y;
 
         //printf("%f %f %f %f %f %f\n",x1,x2,x1_i,x1_j,x2_i,x2_j);
-        //flag = 0;
+        //game_start = 0;
 
     }
 
@@ -188,11 +216,26 @@ void ball_wall_coll(ball *obj)
 
 }
 
+void print_text(char *str,int len)
+{
+
+    glColor3f(1, 0, 0);
+    glRasterPos3f( -1.5 , 1.5 , -5.0);
+   // int len = (int)strlen(str);
+   //printf("this: %c\n",str[i]);
+    for(i = 0; i<len; i++)
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, str[i]);
+}
+
 
 void update()
 {
+    char str[20];
+    int str_len = sprintf(str,"Lives : %d", player_life);
+    print_text(&str,str_len);
 
-    if(flag)
+
+    if(game_start)
     {
         for(i=0;i<ball_no;i++)
         {
@@ -210,8 +253,9 @@ void update()
 
             enemy[i].pos_x += enemy[i].vel_x;
             enemy[i].pos_y += enemy[i].vel_y;
-            if(i == 2)
+/*            if(i == 2)
                 printf("%d: %f %f  %f %f\n",i,enemy[i].pos_x,enemy[i].pos_y,enemy[i].vel_y,enemy[i].vel_y);
+*/
         }
 
 
@@ -221,6 +265,7 @@ void update()
     for(i=0;i<ball_no;i++)
     {
          enemy_player_coll(&enemy[i]);
+
     }
 
 
@@ -232,14 +277,14 @@ void update()
     {
         player.vel_x = temp_x / temp_xy * player_speed;
         player.vel_y = temp_y / temp_xy * player_speed;
-        //flag=0;
+        //game_start=0;
     }
 //printf("done calculating vel  %f %f\n",player.vel_x,player.vel_y);
  //printf("before updating %f %f %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
     player.pos_x += player.vel_x;
     player.pos_y += player.vel_y;
     //printf("updating player pos: %f %f vel: %f %f\n",player.pos_x,player.pos_y,player.vel_x,player.vel_y);
-    //flag=0;
+    //game_start=0;
 
 
 }
@@ -256,22 +301,29 @@ void display()
     //drawBall1();
 
     //drawBall2();
-    if(flag)
-     update();
+    if(game_start)
+        update();
+    else
+    {
+        char str[20];
+        int str_len = sprintf(str,"Click to start");
+        print_text(&str,str_len);
+
+    }
 
     // Draw Enemies
 
     for(i=0;i<ball_no;i++)
     {
         //printf("%d\n",i);
-         drawBall(&enemy[i]);
+         drawBall(&enemy[i],1);
     }
 
 
     // Draw player
-    drawBall(&player);
+    drawBall(&player,0);
 
-
+    glFlush();
     glutSwapBuffers();
 }
 
@@ -285,6 +337,7 @@ int main(int argc,char **argv)
     glutInitWindowSize(window_width,window_height);
 
     glutCreateWindow("Collision Window");
+init();
 
     initRendering();
     //printf("%d %d",GLUT_SCREEN_WIDTH,GLUT_SCREEN_WIDTH);
@@ -293,7 +346,7 @@ int main(int argc,char **argv)
     //Init
     // instantiate Enemies
 
-    const_ball(1.0,1.0,-0.857,-0.514,&enemy[0]);
+    const_ball(1.0,1.0,0.857,-0.514,&enemy[0]);
     const_ball(-1.5,0.2,0.514,-0.857,&enemy[1]);
     const_ball(0.6,-1.0,-0.919,0.394,&enemy[2]);
     const_ball(-0.4,-1.4,0.965,0.263,&enemy[3]);
